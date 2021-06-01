@@ -38,7 +38,7 @@ class AuthenticationController extends Controller
      */
     public function index(Request $request)
     {
-//         try {
+        try {
             $emailDecrypted = $this->giaimadulieu($request->email);
             $passwordDecrypted = $this->giaimadulieu($request->password);
 
@@ -81,12 +81,12 @@ class AuthenticationController extends Controller
                     'message' => "email hoặc password chưa đúng.",
                 ]);
             }
-//         } catch (\Exception $exception) {
-//             return response([
-//                 'status' => false,
-//                 'message' => "Something went wrong",
-//             ]);
-//         }
+        } catch (\Exception $exception) {
+            return response([
+                'status' => false,
+                'message' => "Something went wrong",
+            ]);
+        }
     }
 
     public function current_user()
