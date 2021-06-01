@@ -1,0 +1,257 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\ChuDe;
+use App\Models\User;
+use Error;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Nullix\CryptoJsAes\CryptoJsAes;
+
+class ChuDeController extends Controller
+{
+    public function __construct()
+    {
+        $this->key = (string)config('app.key');
+    }
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        //
+        try
+        {
+            $chude = ChuDe::all();
+            return response([
+                'status' => true,
+                'data' => $chude,
+            ]);
+        }catch(Error $err){
+            return response([
+                'status' => false,
+                'message' => "Something went wrong",
+            ]);
+        }
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
+    }
+
+    public function approve(Request $request)
+    {
+        try{
+            $id = $request->id;
+            $chude = ChuDe::where('_id', $id)->first();
+            $chude->update(['active' => true], ['upsert' => true]);
+
+            $chude['username'] = $chude->user->name;
+    
+            return response([
+                'status' => true,
+                'data' => $chude,
+            ]);
+        }catch(Error $err)
+        {
+            return response([
+                'status' => false,
+                'data' => "Something went wrong",
+            ]);
+        }
+        
+    }
+
+    public function get_latest_chude()
+    {
+        $chude = DB::table('chude')->latest()->first();
+        return $chude['machude'];
+    }
+
+    public function set_new_chude()
+    {
+        $current_latest_id = $this->get_latest_chude();
+        $new_id = "";
+        $arr = explode("_", $current_latest_id);
+        $number = (int)$arr[1];
+        if ($number < 9) {
+            $new_id = "chude_0" . (string)($number + 1);
+        } else if ($number >= 9) {
+            $new_id = "chude_" . (string)($number + 1);
+        }
+        return ($new_id);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        //
+
+        try {
+            // $arr = [];
+            // $a = $request->files;
+            // foreach($a as $b)
+            // {
+            //     foreach($b as $c)
+            //     {
+            //         array_push($arr, $c->getClientOriginalName());
+            //     }
+                
+            // }
+            
+            $chude = new ChuDe;
+            
+            // $can_add = $request->can_add;
+            $chude->machude = $this->set_new_chude();
+            $chude->mota = $request->mota;
+            $chude->noidung = $request->noidung;
+            $chude->active = filter_var($request->active, FILTER_VALIDATE_BOOLEAN);
+            $chude->resource_id = CryptoJsAes::decrypt($request->resource_id, $this->key);
+            $chude->mauser = CryptoJsAes::decrypt($request->mauser, $this->key);
+            $chude->save();
+
+            $latest_chude = ChuDe::find($chude->machude);
+            // if($can_add)
+            // {
+            //     $chude->trangthai = true;
+            // }
+            // else
+            // {
+            //     $chude->trangthai = false;
+            // }
+            $latest_chude['username'] = $latest_chude->user->name;
+            return response([
+                'status' => true,
+                'data' => $latest_chude,
+            ]);
+        } catch (Error $err) {
+            return response([
+                'status' => false,
+                'message' => "Something went wrong",
+            ]);
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Request $request)
+    {
+        //
+        try {
+            $result = [];
+            $resource_id = CryptoJsAes::decrypt($request->resource_id, $this->key);
+            $chude = ChuDe::where('resource_id', $resource_id)->get();
+            $users = User::all('mauser', 'name');
+            // if($chude)
+            // {
+            //     foreach($chude as $cd)
+            //     {
+            //         $cd['username'] = $cd->user->name;
+            //         array_push($result, $cd);
+            //     }
+            // }
+
+            return response([
+                'status' => true,
+                // 'data' => $result,
+                'data' => $chude,
+                'users' => $users,
+                // 'resource_id' => $resource_id
+            ]);
+        } catch (Error $err) {
+            return response([
+                'status' => false,
+                'message' => 'Something went wrong',
+            ]);
+        }
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update($id, Request $request)
+    {
+        //
+        // try{
+            $mota = $request->mota;
+            $noidung = $request->noidung;
+            $active = $request->active;
+
+            $chude = ChuDe::where('_id', $id)->first();
+            $chude->mota = $mota;
+            $chude->noidung = $noidung;
+            $chude->active = filter_var($active, FILTER_VALIDATE_BOOLEAN);
+            $chude->save();
+    
+            $chude['username'] = $chude->user->name;
+            return response([
+                'status' => true,
+                'data' => $chude,
+            ]);
+        // }catch(Error $err)
+        // {
+        //     return response([
+        //         'status' => false,
+        //         'message' => "Something went wrong",
+        //     ]);
+        // }  
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        //
+        try{
+            $chude = ChuDe::where('_id', $id)->delete();
+            return response([
+                'status' => true,
+                'id' => $id,
+            ]);
+        }
+        catch(Error $err)
+        {
+            return response([
+                'status' => false,
+                'message' => 'Something went wrong',
+            ]);
+        }
+    }
+}

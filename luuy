@@ -1,0 +1,78 @@
+composer require laravel/ui
+php artisan ui react
+
+laravel excel:
+use Maatwebsite\Excel\Concerns\SkipsOnError; khi import dữ liệu trong file excel, nếu gặp lỗi thì bỏ qua lỗi ở dòng đó
+và tiếp tục import record tiếp theo
+use Maatwebsite\Excel\Concerns\SkipsErrors; // bỏ qua lỗi và trả về lỗi sau cùng
+
+tải thư viện cho css trong react
+npm i css-loader style-loader --save-dev
+
+https://github.com/paouriel/laravel-mongodb-transaction-fix
+php artisan fix:transaction
+
+install react router dom
+npm install --save react-router-dom
+
+Thực hiện cái bên dưới khi gặp lỗi liên quan đến CORS
+ - composer require fruitcake/laravel-cors
+ - php artisan vendor:publish --tag="cors"
+
+Client ID: 605624ba9e44000081003552
+Client secret: n11tWhDo2nH7d6ITd7oCDmY6X5taj4HOIzh14bzL
+Password grant client created successfully.
+Client ID: 605624bc9e44000081003554
+Client secret: ky91TDI8jAMQt5tNGx4X0zAFhuAt7WGw5m4AWm6O
+
++++ Sửa lỗi php artisan passport:install do mongodb:
+search từ khóa: insert into "oauth_clients" error mongodb
+Vô được trang này https://github.com/jenssegers/laravel-mongodb/issues/1341
+kéo xuống tìm comment của gstarle92
+
+Tải PHP Intelephense extension để auto import class
+
+Khi vừa đăng nhập xong chúng ta tạo ra Authorization token: Baerer token ( dùng trong axios qua API), khi qua trang khác, để lấy thông tin user đã đăng nhập ta
+phải dựa vào Authorization token
+
+++ Quy trình khi đăng nhập:
+B1: nhập Email/password (kiểm tra điều kiện Email/password có thỏa chưa)
+B2: Submit form ==> gửi thông tin đăng nhập sử dụng axios đến server(laravel) để xử lý ( route post /login):
+    - Nếu đúng thông tin như trong CSDL thì sẽ tạo ra response ( gồm message, token, user) 
+B3: Thông tin response đó được reactjs nhận và render ra giao diện của ng dùng, đồng thời token cũng được lưu trong localStorage.
+
+++ Khi vào trang Home, có hiện thị thông tin user đã đăng nhập:
+B1: Reactjs sẽ get token, gửi 1 request đến server(laravel) kèm theo header request( trong header có chứa token) để xử lý ( route get /user)
+B2: Sau khi check Authorization, server trả về response là thông tin user
+
+++ Tạo chức năng forgot password
+B1: tạo controller Forgot Password: php artisan make:controller ForgotController( xử lý quên mật khẩu)
+B2: tạo request forgot: php artisan make:request ForgotRequest
+B3: Gửi mail trong laravel:
+    - php artisan make:mail SendMail( trong đây thực hiện gửi mail)
+    - https://www.youtube.com/watch?v=kWEvrHVg8kI
+    - fix lại 1 số thứ trong env:
+        MAIL_MAILER=smtp
+        MAIL_HOST=smtp.googlemail.com
+        MAIL_PORT=465
+        MAIL_USERNAME=hainguyenvan6799.webdev@gmail.com
+        MAIL_PASSWORD=ypanqyqzajtgptdw
+        MAIL_ENCRYPTION=ssl
+        MAIL_FROM_ADDRESS=hainguyenvan6799.webdev@gmail.com
+        MAIL_FROM_NAME="${APP_NAME}"
+    - Tạo hàm ra bên trong ForgotController (function forgot)
+    - tạo view trong resource -> views-> emails -> ResetPasswordMail.blade.php ( nội dung của mail)
+    - Từ reactjs dùng axios gửi post request đến server để thực hiện nhận các ký tự để xác nhận ResetPasswordMail
+
+
+Sửa lỗi view not found in laravel:
+php artisan route:cache
+php artisan config:cache
+php artisan cache:clear
+php artisan migrate:rollback --path=/database/migrations/2021_04_28_170133_create-table-roles.php  
+
+Question: page expired when post a form
+Solution: https://infinitbility.com/how-to-solve-page-expired-error-in-laravel-for-webhooks-ajax-and-form( tham khảo trang này)
+
+Cài đặt phiên bản riêng cryptojs: do 
+composer require brainfoolong/cryptojs-aes-php
