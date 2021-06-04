@@ -57,18 +57,21 @@ class AwsController extends Controller
         return $result;
     }
 
-    public function upload_file_aws(Request $request){
-        try{
-            $file = $request->file('file');
+    public function upload_file_aws(Request $request)
+    {
+        try {
             $foldername = $request->folder_name;
             $email = $request->email;
             $mauser = $request->mauser;
 
-            $filename = time() . $file->getClientOriginalName();
-            $result = $file->storeAs($foldername, $filename, 's3');
-
             $user = User::where('email', $email)->first();
-            $user->push('private_files', $filename);
+            $files = $request->file('files');
+            foreach ($files as $file) {
+                $filename = time() . $file->getClientOriginalName();
+                $result = $file->storeAs($foldername, $filename, 's3');
+                $user->push('private_files', $filename);
+            }
+
 
             $get_file_from_aws = $this->get_file_from_aws($mauser);
 
@@ -77,14 +80,13 @@ class AwsController extends Controller
                 // 'result' => $result,
                 'result' => $get_file_from_aws,
 
-                ]);
-        }catch(Error $err){
+            ]);
+        } catch (Error $err) {
             return response([
                 'status' => false,
                 'message' => 'Something went wrong',
             ]);
         }
-        
     }
 
     public function get_url_file_aws_base($folderName, $fileName)
