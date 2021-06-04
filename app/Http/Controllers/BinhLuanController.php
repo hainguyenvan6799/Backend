@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\Notification;
 use App\Models\BinhLuan;
 use App\Models\User;
 use Error;
@@ -19,11 +20,23 @@ class BinhLuanController extends Controller
     public function xembinhluan(Request $request)
     {
         try {
+            $urls = [];
             $machude = $request->machude;
+            $folderName = "chude" . $machude . "_comment";
             $comments = BinhLuan::where('machude', $machude)->get();
+
             $users = User::all('mauser', 'name');
 
             if (count($comments) > 0) {
+                foreach ($comments as $comment) {
+                    if ($comment->files) {
+                        foreach ($comment->files as $fileName) {
+                            $urls[] = $this->awsController->get_file_aws_base($folderName, $fileName);
+                        }
+                    }
+                    $comment['urls'] = $urls;
+                    $urls = [];
+                }
                 return response([
                     'status' => true,
                     'comments' => $comments,
@@ -46,7 +59,6 @@ class BinhLuanController extends Controller
     public function create_a_comment(Request $request)
     {
         // try {
-
         $machude = $request->machude;
         $folderName = "chude" . $machude . "_comment/";
         $mauser = $request->mauser;
@@ -56,29 +68,24 @@ class BinhLuanController extends Controller
         $comment->machude = $machude;
         $comment->mauser = $mauser;
         $comment->noidungbinhluan = $noidung;
-        // $arr = [];
-        // $arr_url = [];
-        // $a = $request->files;
-        // if ($a) {
-        //     foreach ($a as $b) {
-        //         foreach ($b as $file) {
-        //             $this->awsController->uploadfileaws_base($file, $folderName);
-        //             array_push($arr, time() . $file->getClientOriginalName());
-        //             $url = $this->awsController->get_url_file_aws_base($folderName, time() . $file->getClientOriginalName());
-        //             array_push($arr_url, [
-        //                 'fileName' => time() . $file->getClientOriginalName(),
-        //                 'fileUrl' => $url,
-        //             ]);
-        //         }
-        //     }
-        //     $comment->files = $arr;
-        // }
+        $files = $request->file('files');
+        foreach ($files as $file) {
+            $arrFiles[] = time() . $file->getClientOriginalName();
+            $this->awsController->uploadfileaws_base($file, $folderName);
+        }
+        $comment->files = $arrFiles;
 
         $comment->save();
+
+        event(new Notification(
+            [
+                'username' => $comment->user->name,
+                'tenchude' => $comment->chude->mota,
+            ]
+        ));
         return response([
             'status' => true,
             'binhluan' => $comment,
-            // 'arr_url' => $arr_url,
         ]);
         // } catch (Error $err) {
         //     return response([
