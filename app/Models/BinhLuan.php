@@ -11,4 +11,13 @@ class BinhLuan extends Model
     protected $collection = "binhluan";
     protected $fillable = ["noidungbinhluan", "files"];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'mauser', 'mauser');
+    }
+
+    public function chude()
+    {
+        return $this->belongsTo(ChuDe::class, 'machude', 'machude');
+    }
 }
