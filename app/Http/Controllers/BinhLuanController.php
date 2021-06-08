@@ -68,12 +68,14 @@ class BinhLuanController extends Controller
         $comment->machude = $machude;
         $comment->mauser = $mauser;
         $comment->noidungbinhluan = $noidung;
-        $files = $request->file('files');
-        foreach ($files as $file) {
-            $arrFiles[] = time() . $file->getClientOriginalName();
-            $this->awsController->uploadfileaws_base($file, $folderName);
+        if ($request->file("files")) {
+            $files = $request->file('files');
+            foreach ($files as $file) {
+                $arrFiles[] = time() . $file->getClientOriginalName();
+                $this->awsController->uploadfileaws_base($file, $folderName);
+            }
+            $comment->files = $arrFiles;
         }
-        $comment->files = $arrFiles;
 
         $comment->save();
 
