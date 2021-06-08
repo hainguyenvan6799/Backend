@@ -303,10 +303,12 @@ class TaiLieuController extends Controller
         try {
             $tailieu = TaiLieu::where('_id', $id);
             $active = $tailieu->first()->active;
+            $resource_id = $tailieu->first()->resource_id;
             event(new MyEvent([
                 'isDelete' => true,
                 '_id' => $id,
                 'active' => filter_var($active, FILTER_VALIDATE_BOOLEAN),
+                'resource_id' => $resource_id,
             ]));
             $tailieu->delete();
 
