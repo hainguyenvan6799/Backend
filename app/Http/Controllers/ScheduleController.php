@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ScheduleCalendar;
+use App\Events\ScheduleCalendarEvent;
+
 
 class ScheduleController extends Controller
 {
@@ -27,6 +29,17 @@ class ScheduleController extends Controller
         $magiaovien = $request->magiaovien;
         $schedule = ScheduleCalendar::where('magiaovien', $magiaovien);
         $schedule->push('schedule_list', $data);
+        
+        event(new ScheduleCalendarEvent([
+            'magiaovien' => $magiaovien,
+            'isAdd' => true,
+            'allDay' => false,
+            'id' => $request->id,
+            'title' => $request->title,
+            'startDate' => $request->startDate,
+            'endDate' => $request->endDate,
+        ]));
+        
         return response([
             'message' => "success",
         ]);
@@ -44,6 +57,17 @@ class ScheduleController extends Controller
         $schedule = ScheduleCalendar::where('magiaovien', $magiaovien);
         $schedule->pull('schedule_list', ['id' => $request->id]);
         $schedule->push('schedule_list', $data);
+        
+        event(new ScheduleCalendarEvent([
+            'magiaovien' => $magiaovien,
+            'isUpdate' => true,
+            'allDay' => false,
+            'id' => $request->id,
+            'title' => $request->title,
+            'startDate' => $request->startDate,
+            'endDate' => $request->endDate,
+        ]));
+        
         return response([
             'message' => "success",
         ]);
@@ -54,6 +78,13 @@ class ScheduleController extends Controller
         $magiaovien = $request->magiaovien;
         $schedule = ScheduleCalendar::where('magiaovien', $magiaovien);
         $schedule->pull('schedule_list', ['id' => $request->id]);
+        
+        event(new ScheduleCalendarEvent([
+            'magiaovien' => $magiaovien,
+            'isDelete' => true,
+            'id' => $request->id,
+        ]));
+        
         return response([
             'message' => "success",
         ]);
