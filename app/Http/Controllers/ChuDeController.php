@@ -8,6 +8,7 @@ use Error;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Nullix\CryptoJsAes\CryptoJsAes;
+use App\Events\Topic;
 
 class ChuDeController extends Controller
 {
@@ -56,6 +57,19 @@ class ChuDeController extends Controller
             $chude->update(['active' => true], ['upsert' => true]);
 
             $chude['username'] = $chude->user->name;
+            $username = $chude->user->name;
+
+            event(new Topic([
+                'isApprove' => true,
+                'active' => filter_var(true, FILTER_VALIDATE_BOOLEAN),
+                'machude' => $chude->machude,
+                'mota' => $chude->mota,
+                'noidung' => $chude->noidung,
+                'resource_id' => $chude->resource_id,
+                'mauser' => $chude->mauser,
+                'username' => $username,
+                '_id' => $chude->_id,
+            ]));
     
             return response([
                 'status' => true,
@@ -134,6 +148,21 @@ class ChuDeController extends Controller
             //     $chude->trangthai = false;
             // }
             $latest_chude['username'] = $latest_chude->user->name;
+            $username = $latest_chude->user->name;
+            $_id = $latest_chude['_id'];
+
+            event(new Topic([
+                'isAdd' => true,
+                'active' => filter_var($latest_chude->active, FILTER_VALIDATE_BOOLEAN),
+                'machude' => $latest_chude->machude,
+                'mota' => $latest_chude->mota,
+                'noidung' => $latest_chude->noidung,
+                'resource_id' => $latest_chude->resource_id,
+                'mauser' => $latest_chude->mauser,
+                'username' => $username,
+                '_id' => $_id,
+            ]));
+            
             return response([
                 'status' => true,
                 'data' => $latest_chude,
@@ -217,6 +246,21 @@ class ChuDeController extends Controller
             $chude->save();
     
             $chude['username'] = $chude->user->name;
+        
+            $username = $chude->user->name;
+
+            event(new Topic([
+                'isUpdate' => true,
+                'active' => filter_var($chude->active, FILTER_VALIDATE_BOOLEAN),
+                'machude' => $chude->machude,
+                'mota' => $chude->mota,
+                'noidung' => $chude->noidung,
+                'resource_id' => $chude->resource_id,
+                'mauser' => $chude->mauser,
+                'username' => $username,
+                '_id' => $chude->_id,
+            ]));
+        
             return response([
                 'status' => true,
                 'data' => $chude,
@@ -240,7 +284,19 @@ class ChuDeController extends Controller
     {
         //
         try{
-            $chude = ChuDe::where('_id', $id)->delete();
+            $chude = ChuDe::where('_id', $id);
+            $active = $chude->first()->active;
+            $resource_id = $chude->first()->resource_id;
+
+            event(new Topic([
+                'isDelete' => true,
+                'active' => filter_var($active, FILTER_VALIDATE_BOOLEAN),
+                '_id' => $id,
+                'resource_id' => $resource_id,
+            ]));
+
+            $chude->delete();
+            
             return response([
                 'status' => true,
                 'id' => $id,
