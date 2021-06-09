@@ -110,6 +110,7 @@ class UsersImport implements ToModel, WithHeadingRow, withValidation, SkipsOnFai
         $sex = $this->check_sex($row["sex"]);
 
         $new_mauser = $this->set_new_mauser();
+        $userController = new UserController();
 
         
             $data = [
@@ -122,13 +123,15 @@ class UsersImport implements ToModel, WithHeadingRow, withValidation, SkipsOnFai
                 'malop' => $malop,
                 'sex' => $sex,
                 'active' => false,
-                'code' => '',
+                'code' => $userController->set_new_code(),
                 'mauser' => (string)$new_mauser,
             ];
-            array_push($this->rowsImported, [
-                'username' => $row['email'],
-                'password' => CryptoJsAes::encrypt($row['password'], $key),
-            ]);
+            if ($row["email"] !== null) {
+                array_push($this->rowsImported, [
+                    'username' => $row['email'],
+                    'password' => CryptoJsAes::encrypt($row['password'], $key),
+                ]);
+            }
             return new User($data);
         
     }
