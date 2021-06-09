@@ -132,8 +132,9 @@ class UsersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFai
                     'username' => $row['email'],
                     'password' => CryptoJsAes::encrypt($row['password'], $key),
                 ]);
+                return new User($data);
             }
-            return new User($data);
+            
         
     }
 
