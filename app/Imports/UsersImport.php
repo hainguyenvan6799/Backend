@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Http\Controllers\UserController;
 use App\Models\LopHoc;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
