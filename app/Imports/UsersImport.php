@@ -12,7 +12,7 @@ use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\SkipsOnError;
 use Maatwebsite\Excel\Concerns\SkipsErrors;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
-use Maatwebsite\Excel\Concerns\withValidation;
+use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Validators\Failure;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
 use Maatwebsite\Excel\Concerns\RemembersRowNumber;
@@ -22,7 +22,7 @@ use Nullix\CryptoJsAes\CryptoJsAes;
 
 
 
-class UsersImport implements ToModel, WithHeadingRow, withValidation, SkipsOnFailure
+class UsersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFailure
 {
     use Importable, SkipsFailures, RemembersRowNumber;
     // , SkipsErrors;
