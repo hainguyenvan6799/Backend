@@ -105,13 +105,13 @@ class UsersImport implements ToModel, WithHeadingRow, withValidation, SkipsOnFai
     {
         $key = (string)config('app.key');
         $group = $this->check_group($row['group']);
-        $malop = $this->check_class($row["classname"]);
+        $malop = $row["classname"];
 
         $sex = $this->check_sex($row["sex"]);
 
         $new_mauser = $this->set_new_mauser();
 
-        if ($malop !== null) {
+        
             $data = [
                 'name'     => $row["name"],
                 'email'    => $row["email"],
@@ -130,16 +130,7 @@ class UsersImport implements ToModel, WithHeadingRow, withValidation, SkipsOnFai
                 'password' => CryptoJsAes::encrypt($row['password'], $key),
             ]);
             return new User($data);
-        } else {
-            if ($row['email'] !== null) {
-                array_push($this->rowsNotImport, [
-                    'row' => $this->getRowNumber(),
-                    'attribute' => 'malop',
-                    'errors' => ["Mã lớp không tồn tại hoặc lớp học đã có giảng viên chủ nhiệm."],
-                    'values' => ['email' => $row['email']],
-                ]);
-            }
-        }
+        
     }
 
     // public function onError(\Throwable $error){}\
