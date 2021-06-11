@@ -66,10 +66,10 @@ class UsersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFai
         // }
         if($class)
         {
-            return $class->malop;
+            return (string)$class->malop;
         }else
         {
-            return null;
+            return "";
         }
     }
 
@@ -106,7 +106,7 @@ class UsersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFai
     {
         $key = (string)config('app.key');
         $group = $this->check_group($row['group']);
-        $malop = $row["classname"];
+        $malop = $this->check_class($row["classname"]);
 
         $sex = $this->check_sex($row["sex"]);
 
